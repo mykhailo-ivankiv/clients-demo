@@ -1,4 +1,4 @@
-app = "clients-demo-f768"
+app = "clients-demo"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = [ ]
