@@ -1,4 +1,4 @@
-import { Link, useLoaderData, useCatch } from "@remix-run/react";
+import { useLoaderData, useCatch } from "@remix-run/react";
 import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import invariant from "tiny-invariant";
@@ -39,7 +39,6 @@ export default function ClientDetails() {
 
   return (
     <div>
-      <Link to="/clients">close</Link>
       <img src={client.avatar} alt="" />
       <h2>{client.name}</h2>
       <p>{client.title}</p>
