@@ -1,8 +1,9 @@
 import { useState, useRef } from "react";
 import { useSearchParams } from "@remix-run/react";
+import { parseQueryToReact } from "~/utils/queryParser";
 
 function Ghost({ value }: { value: string }) {
-  return <>{value}</>;
+  return <>{parseQueryToReact.run(value).result}</>;
 }
 
 export default function InputQueryClients({ name }: { name: string }) {
@@ -13,8 +14,8 @@ export default function InputQueryClients({ name }: { name: string }) {
   return (
     <div
       className="
-        relative box-border flex w-full whitespace-pre border-2 border-gray-500
-        rounded-l-full
+        relative box-border flex w-full whitespace-pre rounded-l-full border-2
+        border-gray-500
         border-r-transparent
         p-1
         pl-3
@@ -32,6 +33,7 @@ export default function InputQueryClients({ name }: { name: string }) {
           <Ghost value={text} />
         </div>
         <input
+          autoFocus={true}
           className="
             block
             w-full

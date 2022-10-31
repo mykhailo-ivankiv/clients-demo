@@ -14,6 +14,9 @@ import SearchHighlight, {
   SearchHighlightContext,
 } from "~/components/SearchHighlight";
 import InputQueryClients from "~/components/InputQueryClients";
+import { parseQueryToData } from "~/utils/queryParser";
+import { contains, includes } from "ramda";
+import { useMemo } from "react";
 
 type LoaderData = {
   clients: Client[];
@@ -23,15 +26,30 @@ export async function loader({ request }: LoaderArgs) {
   const url = new URL(request.url);
   const query = url.searchParams.get("q")?.trim() || "";
 
+  const data = parseQueryToData.run(query).result;
+
+  const where =
+    data.length !== 0
+      ? {
+          OR: data.map((item) => ({
+            AND: Object.entries(item).flatMap(([key, value]) =>
+              key === "q"
+                ? {
+                    OR: [
+                      { name: { contains: value } },
+                      { title: { contains: value } },
+                      { quote: { contains: value } },
+                    ],
+                  }
+                : { [key]: { contains: value } }
+            ),
+          })),
+        }
+      : {};
+
   return json<LoaderData>({
     clients: await prisma.client.findMany({
-      where: {
-        OR: [
-          { name: { contains: query } },
-          { title: { contains: query } },
-          { quote: { contains: query } },
-        ],
-      },
+      where,
     }),
   });
 }
@@ -52,6 +70,9 @@ function ClientItem({
   const { clientSlug } = useParams();
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q")?.trim().toLowerCase() || "";
+  // TODO: fix it;
+  // const parsedQuery = useMemo(parseQueryToData.run(query).result.map(({ q }) => q), [query]);
+  const parsedQuery = [query];
 
   return (
     <Link
@@ -66,17 +87,23 @@ function ClientItem({
           <SearchHighlight text={name} />
         </span>
 
-        {query && title && title.toLowerCase().indexOf(query) >= 0 && (
-          <div className="text-sm">
-            <SearchHighlight text={title} />
-          </div>
-        )}
+        {title &&
+          parsedQuery.some((query: string) =>
+            includes(query, title.toLowerCase())
+          ) && (
+            <div className="text-sm">
+              <SearchHighlight text={title} />
+            </div>
+          )}
 
-        {query && quote && quote.toLowerCase().indexOf(query) >= 0 && (
-          <div className="text-sm">
-            <SearchHighlight text={quote} />
-          </div>
-        )}
+        {quote &&
+          parsedQuery.some((query: string) =>
+            includes(query, quote.toLowerCase())
+          ) && (
+            <div className="text-sm">
+              <SearchHighlight text={quote} />
+            </div>
+          )}
       </div>
     </Link>
   );
@@ -88,6 +115,13 @@ export default function Clients() {
   const { clients } = useLoaderData<LoaderData>();
 
   const query = searchParams.get("q")?.toLowerCase().trim() || "";
+
+  // TODO: FIX IT
+  // const parsedQuery = useMemo(
+  //   () => parseQueryToData.run(query).result.map(({ q }) => q),
+  //   [query]
+  // );
+  const parsedQuery = [query];
 
   return (
     <main className="mx-auto flex max-w-[960px] justify-items-stretch gap-2 p-4">
@@ -131,7 +165,7 @@ export default function Clients() {
           <div>No clients found try to change query</div>
         )}
 
-        <SearchHighlightContext.Provider value={[query]}>
+        <SearchHighlightContext.Provider value={parsedQuery}>
           {clients.map(({ slug, name, avatar, title, quote }) => (
             <ClientItem
               key={slug}
