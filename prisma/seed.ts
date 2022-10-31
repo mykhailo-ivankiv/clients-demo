@@ -1,6 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import slugify from "slugify";
+import { faker } from "@faker-js/faker";
+// import Avatar from "avataaars";
+import { getRandomAvataaar } from "~/utils/getRandomAvataaar";
 
 slugify.extend({ "™": "-tm" });
 
@@ -60,6 +63,16 @@ const nationalityAdapter = (rawNationality: string) =>
 
 const nameAdapter = (rawName: string) => rawName.replace("<sup>TM</sup>", "™");
 
+const getUniqSlugFromName = async (name: string) => {
+  let slug = slugify(name).toLowerCase();
+
+  let counter = 1;
+  while (await prisma.client.findUnique({ where: { slug } })) {
+    slug = slugify(nameAdapter(`${name} ${counter++}`)).toLowerCase();
+  }
+  return slug;
+};
+
 async function seed() {
   const email = "rachel@remix.run";
 
@@ -87,12 +100,7 @@ async function seed() {
 
   for (const client of clients) {
     const name = nameAdapter(client.name);
-    let slug = slugify(nameAdapter(client.name)).toLowerCase();
-
-    let counter = 1;
-    while (await prisma.client.findUnique({ where: { slug } })) {
-      slug = slugify(nameAdapter(`${client.name} ${counter++}`)).toLowerCase();
-    }
+    let slug = await getUniqSlugFromName(name);
 
     await prisma.client.create({
       data: {
@@ -104,6 +112,22 @@ async function seed() {
         nationality: client.nationality
           ? nationalityAdapter(client.nationality)
           : undefined,
+      },
+    });
+  }
+
+  for (let i = 0; i < 10000; i++) {
+    const name = faker.name.fullName();
+    const slug = await getUniqSlugFromName(name);
+
+    await prisma.client.create({
+      data: {
+        slug,
+        name,
+        title: faker.name.jobTitle(),
+        avatar: getRandomAvataaar(),
+        quote: faker.lorem.sentence(),
+        nationality: faker.address.countryCode("alpha-2"),
       },
     });
   }

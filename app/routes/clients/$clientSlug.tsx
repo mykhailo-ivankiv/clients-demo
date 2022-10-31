@@ -39,7 +39,11 @@ export default function ClientDetails() {
 
   return (
     <div>
-      <img src={client.avatar} alt="" />
+      <img
+        className="h-[264px] w-[280px] rounded-full object-contain"
+        src={client.avatar}
+        alt=""
+      />
       <h2>{client.name}</h2>
       <p>{client.title}</p>
       {client.quote && (

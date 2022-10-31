@@ -23,7 +23,18 @@ import {
   intersperse,
 } from "ramda";
 
-const getQueryParser = (mapper?: Record<string, Function>) => {
+const getQueryParser = (
+  mapper: Partial<{
+    mapKeyword: (keyword: string) => any;
+    mapKeywordWrapper: ([start, keyword, end]: [
+      string | null,
+      string,
+      string | null
+    ]) => unknown;
+    mapQuery: (query: unknown[]) => unknown;
+    mapQueries: (queries: unknown[]) => unknown;
+  }>
+) => {
   //Mappers
   const mapKeyword = mapper?.mapKeyword ?? identity;
   const mapKeywordWrapper = mapper?.mapKeywordWrapper ?? identity;
@@ -56,11 +67,18 @@ const getQueryParser = (mapper?: Record<string, Function>) => {
   return sepBy(char(";"))(query).map(mapQueries);
 };
 
-export const parseQueryToData = getQueryParser({
+const parseQueryToData = getQueryParser({
   mapKeyword: (keyword) => keyword.slice(1),
   mapKeywordWrapper: ([_start, keyword, _end]) => keyword,
-  mapQuery: pipe(
-    reduce<string, [string, object]>(
+  // @ts-ignore
+  mapQuery: pipe<
+    [string[]],
+    [string, Record<string, string>],
+    Record<string, string>,
+    Record<string, string>,
+    Record<string, string>
+  >(
+    reduce<string, [string, Record<string, string>]>(
       ([key, data], keywordOrChar) => {
         if (keywordOrChar.length !== 1) {
           // overwrite the previous key
@@ -69,18 +87,32 @@ export const parseQueryToData = getQueryParser({
           return [keywordOrChar, data];
         }
 
-        return [key, { ...data, [key]: data[key] + keywordOrChar }];
+        return [key, { ...data, [key]: (data[key] ?? "") + keywordOrChar }];
       },
       ["q", { q: "" }]
     ),
     last,
+    // @ts-ignore
     map(trim),
     reject(isEmpty)
   ),
   mapQueries: reject(isEmpty),
 });
 
-export const parseQueryToReact = getQueryParser({
-  mapQueries: intersperse(<span className="text-yellow-500">;</span>),
-  mapKeyword: (keyword) => <span className="text-green-500">{keyword}</span>,
+const parseQueryToReact = getQueryParser({
+  // @ts-ignore
+  mapQueries: intersperse(<span className="text-sky-300">;</span>),
+  mapKeyword: (keyword) => <span className="text-sky-500">{keyword}</span>,
 });
+
+export const getDataFromQuery = (query: string) =>
+  // @ts-ignore
+  parseQueryToData.run(query).result as Partial<{
+    q: string;
+    name: string;
+    title: string;
+    quote: string;
+  }>[];
+export const getReactComponentsFromQuery = (query: string) =>
+  // @ts-ignore
+  parseQueryToReact.run(query).result;

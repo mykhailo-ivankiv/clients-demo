@@ -14,8 +14,8 @@ import SearchHighlight, {
   SearchHighlightContext,
 } from "~/components/SearchHighlight";
 import InputQueryClients from "~/components/InputQueryClients";
-import { parseQueryToData } from "~/utils/queryParser";
-import { contains, includes } from "ramda";
+import { getDataFromQuery } from "~/utils/queryParser";
+import { includes } from "ramda";
 import { useMemo } from "react";
 
 type LoaderData = {
@@ -26,30 +26,40 @@ export async function loader({ request }: LoaderArgs) {
   const url = new URL(request.url);
   const query = url.searchParams.get("q")?.trim() || "";
 
-  const data = parseQueryToData.run(query).result;
+  const data = getDataFromQuery(query);
 
   const where =
     data.length !== 0
       ? {
           OR: data.map((item) => ({
-            AND: Object.entries(item).flatMap(([key, value]) =>
-              key === "q"
-                ? {
+            AND: Object.entries(item).flatMap(([key, value]) => {
+              switch (key) {
+                case "q":
+                  return {
                     OR: [
                       { name: { contains: value } },
                       { title: { contains: value } },
                       { quote: { contains: value } },
                     ],
-                  }
-                : { [key]: { contains: value } }
-            ),
+                  };
+                case "name":
+                  return { name: { contains: value } };
+                case "quote":
+                  return { quote: { contains: value } };
+                case "title":
+                  return { title: { contains: value } };
+                default:
+                  return {};
+              }
+            }),
           })),
         }
-      : {};
+      : undefined;
 
   return json<LoaderData>({
     clients: await prisma.client.findMany({
       where,
+      take: 10,
     }),
   });
 }
@@ -70,9 +80,31 @@ function ClientItem({
   const { clientSlug } = useParams();
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q")?.trim().toLowerCase() || "";
-  // TODO: fix it;
-  // const parsedQuery = useMemo(parseQueryToData.run(query).result.map(({ q }) => q), [query]);
-  const parsedQuery = [query];
+
+  const parsedQuery = useMemo(
+    () =>
+      getDataFromQuery(query)
+        .map(Object.entries)
+        .flat()
+        .flatMap((pair: [string, string]) =>
+          pair[0] === "q"
+            ? [
+                ["name", pair[1]],
+                ["title", pair[1]],
+                ["quote", pair[1]],
+              ]
+            : [pair]
+        )
+        .reduce<Record<string, string[]>>((acc, [key, value]) => {
+          if (acc[key]) {
+            acc[key].push(value);
+          } else {
+            acc[key] = [value];
+          }
+          return acc;
+        }, {}),
+    [query]
+  );
 
   return (
     <Link
@@ -81,28 +113,44 @@ function ClientItem({
         clientSlug === slug ? "bg-gray-100" : ""
       }`}
     >
-      <img className="h-8 w-8" src={avatar} alt="" />
+      <img
+        className="h-8 w-8 rounded-full object-contain"
+        src={avatar}
+        alt=""
+      />
       <div>
-        <span className="text-indigo-600">
-          <SearchHighlight text={name} />
-        </span>
+        <SearchHighlightContext.Provider value={parsedQuery.name || []}>
+          <span className="text-indigo-600">
+            <SearchHighlight text={name} />
+          </span>
+        </SearchHighlightContext.Provider>
 
         {title &&
-          parsedQuery.some((query: string) =>
+          parsedQuery.title?.some((query: string) =>
             includes(query, title.toLowerCase())
           ) && (
-            <div className="text-sm">
-              <SearchHighlight text={title} />
-            </div>
+            <SearchHighlightContext.Provider value={parsedQuery.title || []}>
+              <dl className="flex gap-1 text-sm">
+                <dt className="w-12 text-gray-400">title:</dt>
+                <dd className="">
+                  <SearchHighlight text={title} />
+                </dd>
+              </dl>
+            </SearchHighlightContext.Provider>
           )}
 
         {quote &&
-          parsedQuery.some((query: string) =>
+          parsedQuery.quote?.some((query: string) =>
             includes(query, quote.toLowerCase())
           ) && (
-            <div className="text-sm">
-              <SearchHighlight text={quote} />
-            </div>
+            <SearchHighlightContext.Provider value={parsedQuery.quote || []}>
+              <dl className="flex gap-1 text-sm">
+                <dt className="w-12 text-gray-400">quote:</dt>
+                <dd>
+                  <SearchHighlight text={quote} />
+                </dd>
+              </dl>
+            </SearchHighlightContext.Provider>
           )}
       </div>
     </Link>
@@ -111,17 +159,7 @@ function ClientItem({
 
 export default function Clients() {
   const { clientSlug } = useParams();
-  const [searchParams] = useSearchParams();
   const { clients } = useLoaderData<LoaderData>();
-
-  const query = searchParams.get("q")?.toLowerCase().trim() || "";
-
-  // TODO: FIX IT
-  // const parsedQuery = useMemo(
-  //   () => parseQueryToData.run(query).result.map(({ q }) => q),
-  //   [query]
-  // );
-  const parsedQuery = [query];
 
   return (
     <main className="mx-auto flex max-w-[960px] justify-items-stretch gap-2 p-4">
@@ -165,18 +203,16 @@ export default function Clients() {
           <div>No clients found try to change query</div>
         )}
 
-        <SearchHighlightContext.Provider value={parsedQuery}>
-          {clients.map(({ slug, name, avatar, title, quote }) => (
-            <ClientItem
-              key={slug}
-              name={name}
-              slug={slug}
-              avatar={avatar}
-              title={title}
-              quote={quote}
-            />
-          ))}
-        </SearchHighlightContext.Provider>
+        {clients.map(({ slug, name, avatar, title, quote }) => (
+          <ClientItem
+            key={slug}
+            name={name}
+            slug={slug}
+            avatar={avatar}
+            title={title}
+            quote={quote}
+          />
+        ))}
       </Form>
       <div className="flex-1">
         <Outlet />

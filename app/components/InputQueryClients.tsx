@@ -1,9 +1,9 @@
 import { useState, useRef } from "react";
 import { useSearchParams } from "@remix-run/react";
-import { parseQueryToReact } from "~/utils/queryParser";
+import { getReactComponentsFromQuery } from "~/utils/queryParser";
 
 function Ghost({ value }: { value: string }) {
-  return <>{parseQueryToReact.run(value).result}</>;
+  return <>{getReactComponentsFromQuery(value)}</>;
 }
 
 export default function InputQueryClients({ name }: { name: string }) {
