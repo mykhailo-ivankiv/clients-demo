@@ -46,10 +46,14 @@ const getQueryParser = (
   const nameKeyWord = str(":name");
   const titleKeyWord = str(":title");
   const quoteKeyWord = str(":quote");
+  const nationalityKeyWord = str(":nationality");
 
-  const keyword = choice([nameKeyWord, titleKeyWord, quoteKeyWord]).map(
-    mapKeyword
-  );
+  const keyword = choice([
+    nameKeyWord,
+    titleKeyWord,
+    quoteKeyWord,
+    nationalityKeyWord,
+  ]).map(mapKeyword);
 
   const startOrWhitespace = choice([whitespace, startOfInput]);
   const endOrWhitespace = choice([whitespace, endOfInput]);
@@ -101,7 +105,7 @@ const parseQueryToData = getQueryParser({
 
 const parseQueryToReact = getQueryParser({
   // @ts-ignore
-  mapQueries: intersperse(<span className="text-sky-300">;</span>),
+  mapQueries: intersperse(<span className="text-orange-500">;</span>),
   mapKeyword: (keyword) => <span className="text-sky-500">{keyword}</span>,
 });
 

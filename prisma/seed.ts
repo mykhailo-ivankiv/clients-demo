@@ -2,8 +2,8 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import slugify from "slugify";
 import { faker } from "@faker-js/faker";
-// import Avatar from "avataaars";
 import { getRandomAvataaar } from "~/utils/getRandomAvataaar";
+import { getCountryCodeFromName } from "~/utils/location";
 
 slugify.extend({ "™": "-tm" });
 
@@ -51,16 +51,6 @@ const clients = [
   },
 ];
 
-const nationalityMap: Record<string, string> = {
-  France: "FR",
-  India: "IN",
-  Ireland: "IE",
-  "New Zealand": "NZ",
-};
-
-const nationalityAdapter = (rawNationality: string) =>
-  nationalityMap[rawNationality];
-
 const nameAdapter = (rawName: string) => rawName.replace("<sup>TM</sup>", "™");
 
 const getUniqSlugFromName = async (name: string) => {
@@ -72,6 +62,15 @@ const getUniqSlugFromName = async (name: string) => {
   }
   return slug;
 };
+
+function nationalityAdapter(nationality: string) {
+  const countryCode = getCountryCodeFromName(nationality);
+  if (!countryCode) {
+    console.warn(`Could not find country code for: ${nationality}`);
+  }
+
+  return countryCode;
+}
 
 async function seed() {
   const email = "rachel@remix.run";

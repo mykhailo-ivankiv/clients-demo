@@ -15,8 +15,12 @@ import SearchHighlight, {
 } from "~/components/SearchHighlight";
 import InputQueryClients from "~/components/InputQueryClients";
 import { getDataFromQuery } from "~/utils/queryParser";
-import { includes } from "ramda";
+import { includes, trim, isEmpty } from "ramda";
 import { useMemo } from "react";
+import {
+  getCountryCodeFromName,
+  getCountryNameFromCode,
+} from "~/utils/location";
 
 type LoaderData = {
   clients: Client[];
@@ -48,6 +52,17 @@ export async function loader({ request }: LoaderArgs) {
                   return { quote: { contains: value } };
                 case "title":
                   return { title: { contains: value } };
+                case "nationality":
+                  return {
+                    OR: value
+                      .split(",")
+                      .map(trim)
+                      .map(getCountryCodeFromName)
+                      .filter((a) => a)
+                      .map((countryCode) => ({
+                        nationality: { equals: countryCode },
+                      })),
+                  };
                 default:
                   return {};
               }
@@ -70,12 +85,14 @@ function ClientItem({
   avatar,
   title,
   quote,
+  nationality,
 }: {
   slug: string;
   name: string;
   avatar: string;
   title: string | null;
-  quote?: string | null;
+  quote: string | null;
+  nationality: string | null;
 }) {
   const { clientSlug } = useParams();
   const [searchParams] = useSearchParams();
@@ -96,11 +113,22 @@ function ClientItem({
             : [pair]
         )
         .reduce<Record<string, string[]>>((acc, [key, value]) => {
-          if (acc[key]) {
-            acc[key].push(value);
-          } else {
-            acc[key] = [value];
+          if (key === "nationality") {
+            const nationalities = value
+              .split(",")
+              .map(trim)
+              .map(getCountryCodeFromName)
+              .filter((countryCode) => countryCode !== undefined) as string[];
+
+            if (acc[key]) acc[key].push(...nationalities);
+            else acc[key] = nationalities;
+
+            return acc;
           }
+
+          if (acc[key]) acc[key].push(value);
+          else acc[key] = [value];
+
           return acc;
         }, {}),
     [query]
@@ -114,15 +142,15 @@ function ClientItem({
       }`}
     >
       <img
-        className="h-8 w-8 rounded-full object-contain"
+        className="aspect-square h-8 rounded-full object-contain"
         src={avatar}
         alt=""
       />
       <div>
         <SearchHighlightContext.Provider value={parsedQuery.name || []}>
-          <span className="text-indigo-600">
+          <h4 className="text-indigo-600">
             <SearchHighlight text={name} />
-          </span>
+          </h4>
         </SearchHighlightContext.Provider>
 
         {title &&
@@ -130,8 +158,8 @@ function ClientItem({
             includes(query, title.toLowerCase())
           ) && (
             <SearchHighlightContext.Provider value={parsedQuery.title || []}>
-              <dl className="flex gap-1 text-sm">
-                <dt className="w-12 text-gray-400">title:</dt>
+              <dl className="flex gap-1 text-xs">
+                <dt className="text-gray-400">title:</dt>
                 <dd className="">
                   <SearchHighlight text={title} />
                 </dd>
@@ -144,13 +172,27 @@ function ClientItem({
             includes(query, quote.toLowerCase())
           ) && (
             <SearchHighlightContext.Provider value={parsedQuery.quote || []}>
-              <dl className="flex gap-1 text-sm">
-                <dt className="w-12 text-gray-400">quote:</dt>
+              <dl className="flex gap-1 text-xs">
+                <dt className="text-gray-400">quote:</dt>
                 <dd>
                   <SearchHighlight text={quote} />
                 </dd>
               </dl>
             </SearchHighlightContext.Provider>
+          )}
+
+        {nationality &&
+          parsedQuery.nationality?.some(
+            (countryCode: string) => countryCode === nationality
+          ) && (
+            <dl className="flex gap-1 text-xs">
+              <dt className="text-gray-400">nationality:</dt>
+              <dd>
+                <span className="bg-yellow-100">
+                  {getCountryNameFromCode(nationality)}
+                </span>
+              </dd>
+            </dl>
           )}
       </div>
     </Link>
@@ -162,61 +204,43 @@ export default function Clients() {
   const { clients } = useLoaderData<LoaderData>();
 
   return (
-    <main className="mx-auto flex max-w-[960px] justify-items-stretch gap-2 p-4">
+    <main className="mx-auto min-w-[375px] max-w-[600px] px-2">
       <Form
         action={clientSlug ? `/clients/${clientSlug}` : "/clients"}
-        className="w-[400px]"
+        className="w-full"
       >
-        <div className="mb-4 flex">
+        <div className="sticky top-0 z-10 mb-1 bg-white py-2">
           <InputQueryClients name="q" />
-          <button
-            className="
-              relative
-              right-1
-              rounded-r-full
-              border-2
-              border-gray-500
-              border-l-transparent
-              px-3
-              text-black
-              focus:border-blue-500
-              focus:ring-1
-              focus:ring-blue-500
-              focus:ring-offset-1
-            "
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 14 14"
-              className="h-5 w-5"
-            >
-              <g className="fill-none stroke-current stroke-1">
-                <circle cx={9} cy={5} r={4.5} />
-                <path d="M10.25,3.67a1.5,1.5,0,0,0-2.31-.23" fill="none" />
-                <line x1={0.5} y1={13.5} x2={6.08} y2={8.43} />
-              </g>
-            </svg>
-          </button>
         </div>
 
-        {clients.length === 0 && (
-          <div>No clients found try to change query</div>
-        )}
+        <div className="flex">
+          <div className="w-[50%] min-w-[12rem] border-r border-gray-200 pr-2">
+            {clients.length === 0 && (
+              <div>No clients found try to change query</div>
+            )}
 
-        {clients.map(({ slug, name, avatar, title, quote }) => (
-          <ClientItem
-            key={slug}
-            name={name}
-            slug={slug}
-            avatar={avatar}
-            title={title}
-            quote={quote}
-          />
-        ))}
+            <div className="flex flex-col gap-1">
+              {clients.map(
+                ({ slug, name, avatar, title, quote, nationality }) => (
+                  <ClientItem
+                    key={slug}
+                    name={name}
+                    slug={slug}
+                    avatar={avatar}
+                    title={title}
+                    quote={quote}
+                    nationality={nationality}
+                  />
+                )
+              )}
+            </div>
+          </div>
+
+          <div className="ml-2 w-[50%] min-w-[10rem]">
+            <Outlet />
+          </div>
+        </div>
       </Form>
-      <div className="flex-1">
-        <Outlet />
-      </div>
     </main>
   );
 }

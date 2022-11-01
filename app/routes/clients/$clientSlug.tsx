@@ -4,22 +4,9 @@ import { json } from "@remix-run/node";
 import invariant from "tiny-invariant";
 import { prisma } from "~/db.server";
 import type { Client } from "@prisma/client";
+import { getCountryNameFromCode, getEmojiFlag } from "~/utils/location";
 
-function getFlagEmoji(countryCode: string) {
-  const codePoints = countryCode
-    .toUpperCase()
-    .split("")
-    .map((char) => 127397 + char.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
-}
-
-function getFullCountyNameFromCode(countryCode: string) {
-  return new Intl.DisplayNames(["en"], { type: "region" }).of(countryCode);
-}
-
-type LoaderData = {
-  client: Client;
-};
+type LoaderData = { client: Client };
 
 export async function loader({ params }: LoaderArgs) {
   invariant(params.clientSlug, "noteId not found");
@@ -38,37 +25,31 @@ export default function ClientDetails() {
   const { client } = useLoaderData<LoaderData>();
 
   return (
-    <div>
+    <article className="flex flex-col">
       <img
-        className="h-[264px] w-[280px] rounded-full object-contain"
+        className="aspect-square w-full max-w-[280px] rounded-full object-contain"
         src={client.avatar}
         alt=""
       />
-      <h2>{client.name}</h2>
-      <p>{client.title}</p>
-      {client.quote && (
-        <blockquote
-          className="
-            relative
-            m-4
-            pl-2
-            before:absolute
-            before:top-[-0.5em]
-            before:left-[-0.7em]
-            before:text-xl
-            before:content-['❝']
-          "
-        >
-          {client.quote}
-        </blockquote>
-      )}
+      <h2 className="text-xl font-bold ">{client.name}</h2>
+
+      <p className="text-gray-700">{client.title}</p>
       {client.nationality && (
         <p>
-          Nationality: {getFlagEmoji(client.nationality)}{" "}
-          {getFullCountyNameFromCode(client.nationality)}
+          <span className="mr-2 text-xs text-gray-400">nationality:</span>
+          {getEmojiFlag(client.nationality)}{" "}
+          {getCountryNameFromCode(client.nationality)}
         </p>
       )}
-    </div>
+      {client.quote && (
+        <p>
+          <div className="my-1 text-xs text-gray-400">quote:</div>
+          <blockquote className=" ml-2 border-l-2 border-gray-300 pl-2">
+            {client.quote}
+          </blockquote>
+        </p>
+      )}
+    </article>
   );
 }
 
