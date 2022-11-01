@@ -3,8 +3,9 @@ import { faker } from '@faker-js/faker'
 import { getRandomAvataaar } from '~/utils/getRandomAvataaar'
 import { getCountryCodeFromName } from '~/utils/location'
 import { prisma } from '~/db.server'
-import { LoaderFunction } from '@remix-run/node'
+import type { LoaderFunction } from '@remix-run/node'
 import { Form, useActionData } from '@remix-run/react'
+
 slugify.extend({ '™': '-tm' })
 
 const clients = [
