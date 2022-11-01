@@ -122,7 +122,7 @@ export default function Seed() {
   if (ok === 'ok') {
     return (
       <div className="flex h-full w-full">
-        <p className="mx-auto mt-16 text-xl">Database has been seeded. 🌱</p>
+        <p className="mx-auto mt-16 text-xl">Database has been seeded 🌱</p>
       </div>
     )
   }
