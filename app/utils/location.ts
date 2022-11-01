@@ -12,8 +12,6 @@ export const getCountryCodes: (lang?: string) => string[] = memoizeWith(
         let code = String.fromCharCode(i) + String.fromCharCode(j);
         let name = countryName.of(code);
 
-        if (code === "FX") name;
-
         if (code !== name) codes.push(code);
       }
     }

@@ -34,7 +34,9 @@ export default function ClientDetails() {
       />
       <h2 className="my-2 text-xl font-bold ">
         {client.name}
-        <span className="block font-medium text-base  text-gray-700">{client.title}</span>
+        <span className="block text-base font-medium  text-gray-700">
+          {client.title}
+        </span>
       </h2>
 
       {client.nationality && (
