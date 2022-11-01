@@ -1,8 +1,217 @@
 import { PrismaClient } from '@prisma/client'
 import slugify from 'slugify'
 import { faker } from '@faker-js/faker'
-import { getRandomAvataaar } from '../app/utils/getRandomAvataaar'
-import { getCountryCodeFromName } from '../app/utils/location'
+import { memoizeWith, defaultTo } from 'ramda'
+const getFullyRandomAvataaar = () =>
+  // prettier-ignore
+  `https://avataaars.io/?${new URLSearchParams({
+    avatarStyle: "Circle",
+    topType: faker.helpers.arrayElement([
+      "NoHair", "Eyepatch", "Hat", "Hijab", "Turban", "WinterHat1", "WinterHat2",
+      "WinterHat3", "WinterHat4", "LongHairBigHair", "LongHairBob", "LongHairBun", "LongHairCurly",
+      "LongHairCurvy", "LongHairDreads", "LongHairFrida", "LongHairFro", "LongHairFroBand", "LongHairNotTooLong",
+      "LongHairShavedSides", "LongHairMiaWallace", "LongHairStraight", "LongHairStraight2", "LongHairStraightStrand",
+      "ShortHairDreads01", "ShortHairDreads02", "ShortHairFrizzle", "ShortHairShaggyMullet", "ShortHairShortCurly",
+      "ShortHairShortFlat", "ShortHairShortRound", "ShortHairShortWaved", "ShortHairSides", "ShortHairTheCaesar",
+      "ShortHairTheCaesarSidePart",
+    ]),
+    accessoriesType: faker.helpers.arrayElement([
+      "Blank", "Kurt", "Prescription01", "Prescription02", "Round", "Sunglasses", "Wayfarers",
+    ]),
+    hairColor: faker.helpers.arrayElement([
+      "Auburn", "Black", "Blonde", "BlondeGolden", "Brown", "BrownDark", "PastelPink",
+      "Blue", "Platinum", "Red", "SilverGray",
+    ]),
+    facialHairType: faker.helpers.arrayElement([
+      "Blank", "BeardMedium", "BeardLight", "BeardMajestic", "MoustacheFancy", "MoustacheMagnum",
+    ]),
+    facialHairColor: faker.helpers.arrayElement([
+      "Auburn", "Black", "Blonde", "BlondeGolden", "Brown", "BrownDark", "Platinum", "Red",
+    ]),
+    clotheType: faker.helpers.arrayElement([
+      "BlazerShirt", "BlazerSweater", "CollarSweater", "GraphicShirt", "Hoodie", "Overall",
+      "ShirtCrewNeck", "ShirtScoopNeck", "ShirtVNeck",
+    ]),
+    clotheColor: faker.helpers.arrayElement([
+      "Black", "Blue01", "Blue02", "Blue03", "Gray01", "Gray02", "Heather",
+      "PastelBlue", "PastelGreen", "PastelOrange", "PastelRed", "PastelYellow", "Pink",
+      "Red", "White",
+    ]),
+    eyeType: faker.helpers.arrayElement([
+      "Close", "Cry", "Default", "Dizzy", "EyeRoll", "Happy", "Hearts", "Side",
+      "Squint", "Surprised", "Wink", "WinkWacky",
+    ]),
+    eyebrowType: faker.helpers.arrayElement([
+      "Angry", "AngryNatural", "Default", "DefaultNatural", "FlatNatural", "RaisedExcited",
+      "RaisedExcitedNatural", "SadConcerned", "SadConcernedNatural", "UnibrowNatural", "UpDown",
+      "UpDownNatural",
+    ]),
+    mouthType: faker.helpers.arrayElement([
+      "Concerned", "Default", "Disbelief", "Eating", "Grimace", "Sad", "ScreamOpen",
+      "Serious", "Smile", "Tongue", "Twinkle", "Vomit",
+    ]),
+    skinColor: faker.helpers.arrayElement(["Tanned", "Yellow", "Pale", "Light", "Brown", "DarkBrown", "Black",]),
+  })}`
+
+const getRandomMaleAvataaar = () =>
+  // prettier-ignore
+  `https://avataaars.io/?${new URLSearchParams({
+    avatarStyle: "Circle",
+    topType: faker.helpers.arrayElement([
+      "NoHair", "Eyepatch", "Hat", "Turban", "LongHairBigHair", "LongHairBob", "LongHairBun",
+      "LongHairCurly", "LongHairCurvy", "LongHairDreads", "LongHairFrida", "LongHairFro",
+      "LongHairFroBand", "LongHairNotTooLong", "LongHairShavedSides", "LongHairMiaWallace", "LongHairStraight",
+      "LongHairStraight2", "LongHairStraightStrand", "ShortHairDreads01", "ShortHairDreads02",
+      "ShortHairFrizzle", "ShortHairShaggyMullet", "ShortHairShortCurly", "ShortHairShortFlat",
+      "ShortHairShortRound", "ShortHairShortWaved", "ShortHairSides", "ShortHairTheCaesar",
+      "ShortHairTheCaesarSidePart",
+    ]),
+    accessoriesType: faker.helpers.arrayElement([
+      "Blank", "Kurt", "Prescription01", "Prescription02", "Round", "Sunglasses",
+      "Wayfarers",
+    ]),
+    hairColor: faker.helpers.arrayElement([
+      "Auburn", "Black", "Blonde", "BlondeGolden", "Brown", "BrownDark", "PastelPink",
+      "Blue", "Platinum", "Red", "SilverGray",
+    ]),
+    facialHairType: faker.helpers.arrayElement([
+      "Blank", "BeardMedium", "BeardLight", "BeardMajestic", "MoustacheFancy", "MoustacheMagnum",
+    ]),
+    facialHairColor: faker.helpers.arrayElement([
+      "Auburn", "Black", "Blonde", "BlondeGolden", "Brown", "BrownDark", "Platinum", "Red",
+    ]),
+    clotheType: faker.helpers.arrayElement([
+      "BlazerShirt", "BlazerSweater", "CollarSweater", "GraphicShirt",
+      "Hoodie", "Overall", "ShirtCrewNeck",
+      "ShirtScoopNeck", "ShirtVNeck",
+    ]),
+    clotheColor: faker.helpers.arrayElement([
+      "Black", "Blue01", "Blue02", "Blue03", "Gray01",
+      "Gray02", "Heather", "PastelBlue", "PastelGreen",
+      "PastelOrange", "PastelRed", "PastelYellow", "Pink", "Red",
+      "White",
+    ]),
+    eyeType: faker.helpers.arrayElement([
+      "Close", "Cry", "Default", "Dizzy", "EyeRoll", "Happy",
+      "Hearts", "Side", "Squint", "Surprised", "Wink",
+      "WinkWacky",
+    ]),
+    eyebrowType: faker.helpers.arrayElement([
+      "Angry", "AngryNatural", "Default", "DefaultNatural", "FlatNatural", "RaisedExcited",
+      "RaisedExcitedNatural", "SadConcerned", "SadConcernedNatural", "UnibrowNatural", "UpDown",
+      "UpDownNatural",
+    ]),
+    mouthType: faker.helpers.arrayElement([
+      "Concerned", "Default", "Disbelief", "Eating", "Grimace", "Sad", "ScreamOpen",
+      "Serious", "Smile", "Tongue", "Twinkle", "Vomit",
+    ]),
+    skinColor: faker.helpers.arrayElement([
+      "Tanned", "Yellow", "Pale", "Light", "Brown", "DarkBrown", "Black",
+    ]),
+  })}`
+
+const getRandomFemaleAvataaar = () =>
+  // prettier-ignore
+  `https://avataaars.io/?${new URLSearchParams({
+    avatarStyle: "Circle",
+    topType: faker.helpers.arrayElement([
+      "NoHair", "Hijab", "Turban", "LongHairBigHair", "LongHairBob", "LongHairBun",
+      "LongHairCurly", "LongHairCurvy", "LongHairDreads", "LongHairFrida", "LongHairFro",
+      "LongHairFroBand", "LongHairNotTooLong", "LongHairShavedSides", "LongHairMiaWallace",
+      "LongHairStraight", "LongHairStraight2", "LongHairStraightStrand", "ShortHairDreads01",
+      "ShortHairDreads02", "ShortHairFrizzle", "ShortHairShaggyMullet", "ShortHairShortCurly",
+      "ShortHairShortFlat", "ShortHairShortRound", "ShortHairShortWaved", "ShortHairSides",
+      "ShortHairTheCaesar", "ShortHairTheCaesarSidePart",
+    ]),
+    accessoriesType: faker.helpers.arrayElement([
+      "Blank", "Kurt", "Prescription01", "Prescription02", "Round", "Sunglasses",
+      "Wayfarers",
+    ]),
+    hairColor: faker.helpers.arrayElement([
+      "Auburn", "Black", "Blonde", "BlondeGolden", "Brown", "BrownDark", "PastelPink",
+      "Blue", "Platinum", "Red", "SilverGray",
+    ]),
+    clotheType: faker.helpers.arrayElement([
+      "BlazerShirt", "BlazerSweater", "CollarSweater", "GraphicShirt", "Hoodie",
+      "Overall", "ShirtCrewNeck", "ShirtScoopNeck", "ShirtVNeck",
+    ]),
+    clotheColor: faker.helpers.arrayElement([
+      "Black", "Blue01", "Blue02", "Blue03", "Gray01", "Gray02", "Heather",
+      "PastelBlue", "PastelGreen", "PastelOrange", "PastelRed", "PastelYellow",
+      "Pink", "Red", "White",
+    ]),
+    eyeType: faker.helpers.arrayElement([
+      "Close", "Cry", "Default", "Dizzy", "EyeRoll", "Happy", "Hearts", "Side",
+      "Squint", "Surprised", "Wink", "WinkWacky",
+    ]),
+    eyebrowType: faker.helpers.arrayElement([
+      "Angry", "AngryNatural", "Default", "DefaultNatural", "FlatNatural", "RaisedExcited",
+      "RaisedExcitedNatural", "SadConcerned", "SadConcernedNatural", "UnibrowNatural",
+      "UpDown", "UpDownNatural",
+    ]),
+    mouthType: faker.helpers.arrayElement([
+      "Concerned", "Default", "Disbelief", "Eating", "Grimace",
+      "Sad", "ScreamOpen", "Serious", "Smile",
+      "Tongue", "Twinkle", "Vomit",
+    ]),
+    skinColor: faker.helpers.arrayElement([
+      "Tanned", "Yellow", "Pale", "Light", "Brown", "DarkBrown", "Black",
+    ]),
+  })}`
+
+export const getRandomAvataaar = () => {
+  const sex = faker.helpers.arrayElement(['male', 'female'])
+
+  return sex === 'male' ? getRandomMaleAvataaar() : getRandomFemaleAvataaar()
+} /*?*/
+
+export const getCountryCodes: (lang?: string) => string[] = memoizeWith(defaultTo('en'), (lang = 'en'): string[] => {
+  const A = 65
+  const Z = 90
+  const countryName = new Intl.DisplayNames([lang], { type: 'region' })
+  const codes = []
+  for (let i = A; i <= Z; ++i) {
+    for (let j = A; j <= Z; ++j) {
+      let code = String.fromCharCode(i) + String.fromCharCode(j)
+      let name = countryName.of(code)
+
+      if (code !== name) codes.push(code)
+    }
+  }
+  return codes
+})
+
+export const getCountryNameFromCode = (countryCode: string, locale = 'en') =>
+  new Intl.DisplayNames([locale], { type: 'region' }).of(countryCode)
+
+export function getEmojiFlag(countryCode: string) {
+  const codePoints = countryCode
+    .toUpperCase()
+    .split('')
+    .map((char) => 127397 + char.charCodeAt(0))
+  return String.fromCodePoint(...codePoints)
+}
+
+const countryNameCodeMap: Record<string, string> = {
+  ...getCountryCodes().reduce<Record<string, string>>((acc, code) => {
+    const name = getCountryNameFromCode(code)
+    if (name) acc[name.toLowerCase()] = code
+    return acc
+  }, {}),
+
+  // Country names that are not in the Intl.DisplayNames list
+  // TODO: extend the list
+  usa: 'US',
+  england: 'GB',
+
+  // Manual corrections
+  // TODO: extend the list
+  france: 'FR',
+  'metropolitan france': 'FX',
+}
+
+export const getCountryCodeFromName = (countryName: string): string | undefined =>
+  countryNameCodeMap[countryName.toLowerCase()]
 
 slugify.extend({ '™': '-tm' })
 
