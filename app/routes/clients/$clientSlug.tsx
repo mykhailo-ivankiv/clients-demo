@@ -1,10 +1,11 @@
-import { useLoaderData, useCatch } from "@remix-run/react";
+import { useLoaderData, useCatch, Link } from "@remix-run/react";
 import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import invariant from "tiny-invariant";
 import { prisma } from "~/db.server";
 import type { Client } from "@prisma/client";
 import { getCountryNameFromCode, getEmojiFlag } from "~/utils/location";
+import { useParams } from "react-router";
 
 type LoaderData = { client: Client };
 
@@ -31,9 +32,11 @@ export default function ClientDetails() {
         src={client.avatar}
         alt=""
       />
-      <h2 className="text-xl font-bold ">{client.name}</h2>
+      <h2 className="my-2 text-xl font-bold ">
+        {client.name}
+        <span className="block font-medium text-base  text-gray-700">{client.title}</span>
+      </h2>
 
-      <p className="text-gray-700">{client.title}</p>
       {client.nationality && (
         <p>
           <span className="mr-2 text-xs text-gray-400">nationality:</span>
@@ -55,9 +58,19 @@ export default function ClientDetails() {
 
 export function CatchBoundary() {
   const caught = useCatch();
-
+  const { clientSlug } = useParams();
   if (caught.status === 404) {
-    return <div>Client not found</div>;
+    return (
+      <div className="m-4 font-bold text-gray-400">
+        Ooops! We couldn't find client with id:{" "}
+        <code className="bg-gray-100 px-1 py-0.5 font-mono font-medium text-blue-700">
+          {clientSlug}
+        </code>
+        <Link className="my-2 block text-indigo-600 underline" to="/clients">
+          Start over
+        </Link>
+      </div>
+    );
   }
 
   throw new Error(`Unexpected caught response with status: ${caught.status}`);
@@ -66,5 +79,12 @@ export function CatchBoundary() {
 export function ErrorBoundary({ error }: { error: Error }) {
   console.error(error);
 
-  return <div>An unexpected error occurred: {error.message}</div>;
+  return (
+    <div className="m-4 font-bold text-gray-400">
+      An unexpected error occurred:{" "}
+      <code className=" block bg-gray-100 px-1 py-0.5 font-mono font-medium text-blue-700">
+        {error.message}
+      </code>
+    </div>
+  );
 }

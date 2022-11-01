@@ -15,7 +15,7 @@ import SearchHighlight, {
 } from "~/components/SearchHighlight";
 import InputQueryClients from "~/components/InputQueryClients";
 import { getDataFromQuery } from "~/utils/queryParser";
-import { includes, trim, isEmpty } from "ramda";
+import { includes, trim } from "ramda";
 import { useMemo } from "react";
 import {
   getCountryCodeFromName,
@@ -213,10 +213,12 @@ export default function Clients() {
           <InputQueryClients name="q" />
         </div>
 
-        <div className="flex">
+        <div className="min-h-16 flex">
           <div className="w-[50%] min-w-[12rem] border-r border-gray-200 pr-2">
             {clients.length === 0 && (
-              <div>No clients found try to change query</div>
+              <div className="m-4 font-bold text-gray-400">
+                Nothing found try another query
+              </div>
             )}
 
             <div className="flex flex-col gap-1">
