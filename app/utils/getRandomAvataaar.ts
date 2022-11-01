@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getFullyRandomAvataaar = () =>
   // prettier-ignore
   `https://avataaars.io/?${new URLSearchParams({
