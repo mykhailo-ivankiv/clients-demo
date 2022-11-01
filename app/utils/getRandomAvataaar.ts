@@ -1,4 +1,4 @@
-import { faker } from "@faker-js/faker";
+import { faker } from '@faker-js/faker'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getFullyRandomAvataaar = () =>
@@ -15,8 +15,7 @@ const getFullyRandomAvataaar = () =>
       "ShortHairTheCaesarSidePart",
     ]),
     accessoriesType: faker.helpers.arrayElement([
-      "Blank", "Kurt", "Prescription01", "Prescription02", "Round",
-      "Sunglasses", "Wayfarers",
+      "Blank", "Kurt", "Prescription01", "Prescription02", "Round", "Sunglasses", "Wayfarers",
     ]),
     hairColor: faker.helpers.arrayElement([
       "Auburn", "Black", "Blonde", "BlondeGolden", "Brown", "BrownDark", "PastelPink",
@@ -26,8 +25,7 @@ const getFullyRandomAvataaar = () =>
       "Blank", "BeardMedium", "BeardLight", "BeardMajestic", "MoustacheFancy", "MoustacheMagnum",
     ]),
     facialHairColor: faker.helpers.arrayElement([
-      "Auburn", "Black", "Blonde", "BlondeGolden", "Brown", "BrownDark", "Platinum",
-      "Red",
+      "Auburn", "Black", "Blonde", "BlondeGolden", "Brown", "BrownDark", "Platinum", "Red",
     ]),
     clotheType: faker.helpers.arrayElement([
       "BlazerShirt", "BlazerSweater", "CollarSweater", "GraphicShirt", "Hoodie", "Overall",
@@ -51,10 +49,8 @@ const getFullyRandomAvataaar = () =>
       "Concerned", "Default", "Disbelief", "Eating", "Grimace", "Sad", "ScreamOpen",
       "Serious", "Smile", "Tongue", "Twinkle", "Vomit",
     ]),
-    skinColor: faker.helpers.arrayElement([
-      "Tanned", "Yellow", "Pale", "Light", "Brown", "DarkBrown", "Black",
-    ]),
-  })}`;
+    skinColor: faker.helpers.arrayElement(["Tanned", "Yellow", "Pale", "Light", "Brown", "DarkBrown", "Black",]),
+  })}`
 
 const getRandomMaleAvataaar = () =>
   // prettier-ignore
@@ -111,7 +107,7 @@ const getRandomMaleAvataaar = () =>
     skinColor: faker.helpers.arrayElement([
       "Tanned", "Yellow", "Pale", "Light", "Brown", "DarkBrown", "Black",
     ]),
-  })}`;
+  })}`
 
 const getRandomFemaleAvataaar = () =>
   // prettier-ignore
@@ -160,10 +156,10 @@ const getRandomFemaleAvataaar = () =>
     skinColor: faker.helpers.arrayElement([
       "Tanned", "Yellow", "Pale", "Light", "Brown", "DarkBrown", "Black",
     ]),
-  })}`;
+  })}`
 
 export const getRandomAvataaar = () => {
-  const sex = faker.helpers.arrayElement(["male", "female"]);
+  const sex = faker.helpers.arrayElement(['male', 'female'])
 
-  return sex === "male" ? getRandomMaleAvataaar() : getRandomFemaleAvataaar();
-}; /*?*/
+  return sex === 'male' ? getRandomMaleAvataaar() : getRandomFemaleAvataaar()
+} /*?*/
