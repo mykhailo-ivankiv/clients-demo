@@ -4,6 +4,7 @@ import { getRandomAvataaar } from '~/utils/getRandomAvataaar'
 import { getCountryCodeFromName } from '~/utils/location'
 import { prisma } from '~/db.server'
 import { LoaderFunction } from '@remix-run/node'
+import { Form, useActionData } from '@remix-run/react'
 slugify.extend({ '™': '-tm' })
 
 const clients = [
@@ -109,11 +110,37 @@ async function seed() {
   console.log(`Database has been seeded. 🌱`)
 }
 
-export const loader: LoaderFunction = async () => {
+export const action: LoaderFunction = async () => {
   await seed()
-  return "ok"
+  return 'ok'
 }
 
 export default function Seed() {
-  return <>Database has been seeded. 🌱</>
+  const ok = useActionData()
+
+  if (ok === 'ok') {
+    return (
+      <div className="flex h-full w-full">
+        <p className="mx-auto mt-16 text-xl">Database has been seeded. 🌱</p>
+      </div>
+    )
+  }
+
+  return (
+    <Form action="." method="post" className="flex h-full w-full">
+      <div className="mx-auto mt-16">
+        <p className="text-xl">
+          You are going to seed the database. <br /> Are you sure?
+        </p>
+        <button
+          className="
+            my-4 h-8 rounded-lg bg-slate-900 px-6 text-white hover:bg-slate-700
+            focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
+          type="submit"
+        >
+          Yes
+        </button>
+      </div>
+    </Form>
+  )
 }
