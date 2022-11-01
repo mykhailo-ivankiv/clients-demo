@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 import slugify from 'slugify'
 import { faker } from '@faker-js/faker'
-import { getRandomAvataaar } from '~/utils/getRandomAvataaar'
-import { getCountryCodeFromName } from '~/utils/location'
+import { getRandomAvataaar } from '../app/utils/getRandomAvataaar'
+import { getCountryCodeFromName } from '../app/utils/location'
 
 slugify.extend({ '™': '-tm' })
 
