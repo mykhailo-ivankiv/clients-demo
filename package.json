@@ -46,7 +46,8 @@
     "react-dom": "^18.2.0",
     "react-use": "^17.4.0",
     "slugify": "^1.6.5",
-    "tiny-invariant": "^1.2.0"
+    "tiny-invariant": "^1.2.0",
+    "tslib": "^2.4.1"
   },
   "devDependencies": {
     "@remix-run/dev": "^1.7.4",
