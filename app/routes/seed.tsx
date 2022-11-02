@@ -134,9 +134,8 @@ export default function Seed() {
           You are going to seed the database. <br /> Are you sure?
         </p>
         <button
-          className="
-            my-4 h-8 rounded-lg bg-slate-900 px-6 text-white hover:bg-slate-700
-            focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
+          className="my-4 h-8 rounded-lg bg-slate-900 px-6 text-white hover:bg-slate-700
+                     focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
           type="submit"
         >
           Yes

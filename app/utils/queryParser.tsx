@@ -87,12 +87,7 @@ const parseQueryToReact = getQueryParser({
 
 export const getDataFromQuery = (query: string) =>
   // @ts-ignore
-  parseQueryToData.run(query).result as Partial<{
-    q: string
-    name: string
-    title: string
-    quote: string
-  }>[]
+  parseQueryToData.run(query).result as Partial<{ q: string; name: string; title: string; quote: string }>[]
 
 // @ts-ignore
 export const getReactComponentsFromQuery = (query: string) => parseQueryToReact.run(query).result
@@ -122,9 +117,7 @@ export const getPrismaFilterQueryFromString = (query: string) => {
                     .map(trim)
                     .map(getCountryCodeFromName)
                     .filter((a) => a)
-                    .map((countryCode) => ({
-                      nationality: { equals: countryCode },
-                    })),
+                    .map((countryCode) => ({ nationality: { equals: countryCode } })),
                 }
               default:
                 return {}
