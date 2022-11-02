@@ -1,4 +1,4 @@
-import { Form, Outlet, useLoaderData } from '@remix-run/react'
+import { Form, Outlet, useLoaderData, useSubmit } from '@remix-run/react'
 import { useParams } from 'react-router'
 import { prisma } from '~/db.server'
 import type { LoaderArgs } from '@remix-run/node'
@@ -8,7 +8,7 @@ import InputQueryClients from '~/components/InputQueryClients'
 import { getPrismaFilterQueryFromString } from '~/utils/queryParser'
 import ClientItem from '~/components/ClientItem'
 import { getClientFromJson } from '~/models/client'
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 
 type LoaderData = { clients: Client[] }
 
@@ -26,12 +26,14 @@ export default function Clients() {
   const { clientSlug } = useParams()
   const rawClients = useLoaderData<LoaderData>().clients
   const clients = useMemo(() => rawClients.map(getClientFromJson), [rawClients])
+  const submit = useSubmit()
+  const formRef = useRef<HTMLFormElement>(null)
 
   return (
     <main className="mx-auto min-w-[375px] max-w-[600px] px-2">
-      <Form action={clientSlug ? `/clients/${clientSlug}` : '/clients'} className="w-full">
+      <Form ref={formRef} action={clientSlug ? `/clients/${clientSlug}` : '/clients'} className="w-full">
         <div className="sticky top-0 z-10 mb-1 bg-white py-2">
-          <InputQueryClients name="q" />
+          <InputQueryClients name="q" onChange={() => submit(formRef.current)} />
         </div>
 
         <div className="min-h-16 flex">
