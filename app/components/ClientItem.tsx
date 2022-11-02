@@ -30,7 +30,7 @@ export default function ClientItem({ client }: { client: Client }) {
         </SearchHighlightContext.Provider>
 
         <SearchHighlightContext.Provider value={parsedQuery.title || []}>
-          <div className="flex gap-1 text-xs">
+          <div className="text-xs">
             <SearchHighlight text={title || ''} />
           </div>
         </SearchHighlightContext.Provider>
