@@ -1,7 +1,7 @@
 import { useState, useRef, memo } from 'react'
 import { useSearchParams } from '@remix-run/react'
 import { getReactComponentsFromQuery } from '~/utils/queryParser'
-import { useDebounce, useMount, useFirstMountState } from 'react-use'
+import { useDebounce, useFirstMountState } from 'react-use'
 
 const Ghost = memo(function Ghost({ value }: { value: string }) {
   return <>{getReactComponentsFromQuery(value)}</>

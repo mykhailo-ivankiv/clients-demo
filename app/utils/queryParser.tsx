@@ -11,7 +11,7 @@ import {
   startOfInput,
   sepBy,
 } from 'arcsecond'
-import { identity, reduce, reject, pipe, last, isEmpty, map, trim, intersperse, init } from 'ramda'
+import { identity, reduce, reject, pipe, last, isEmpty, map, trim, init } from 'ramda'
 import { getCountryCodeFromName } from '~/utils/location'
 
 const getQueryParser = (
@@ -95,7 +95,11 @@ const parseQueryToReact = getQueryParser({
       </>
     )
   },
-  mapKeyword: (keyword) => <span key={keyword} className="text-sky-500">{keyword}</span>,
+  mapKeyword: (keyword) => (
+    <span key={keyword} className="text-sky-500">
+      {keyword}
+    </span>
+  ),
 })
 
 export const getDataFromQuery = (query: string) =>
