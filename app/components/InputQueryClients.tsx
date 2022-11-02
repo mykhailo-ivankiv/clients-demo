@@ -1,7 +1,7 @@
 import { useState, useRef, memo } from 'react'
 import { useSearchParams } from '@remix-run/react'
 import { getReactComponentsFromQuery } from '~/utils/queryParser'
-import { useDebounce } from 'react-use'
+import { useDebounce, useMount, useFirstMountState } from 'react-use'
 
 const Ghost = memo(function Ghost({ value }: { value: string }) {
   return <>{getReactComponentsFromQuery(value)}</>
@@ -10,6 +10,7 @@ const Ghost = memo(function Ghost({ value }: { value: string }) {
 export default function InputQueryClients({ name, onChange }: { name: string; onChange: (value: string) => void }) {
   const [searchParams] = useSearchParams()
   const [text, setText] = useState<string>(() => searchParams.get(name) || '')
+  const isFirstMount = useFirstMountState()
 
   useDebounce(() => onChange(text), 500, [text])
 
@@ -30,7 +31,10 @@ export default function InputQueryClients({ name, onChange }: { name: string; on
           </div>
           <input
             autoFocus={true}
-            className=" block w-full bg-transparent p-1 leading-tight text-transparent caret-black focus:outline-none"
+            className={`
+              block w-full p-1 leading-tight text-transparent caret-black transition-all focus:outline-none
+              ${!isFirstMount ? 'bg-transparent text-transparent' : 'bg-white text-black'}
+            `}
             placeholder="e.g. Brendon"
             autoComplete={'off'}
             type="search"

@@ -34,16 +34,16 @@ export default function ClientDetails() {
       </h2>
 
       {client.nationality && (
-        <p>
+        <div>
           <span className="mr-2 text-xs text-gray-400">nationality:</span>
           {getEmojiFlag(client.nationality)} {getCountryNameFromCode(client.nationality)}
-        </p>
+        </div>
       )}
       {client.quote && (
-        <p>
+        <div>
           <div className="my-1 text-xs text-gray-400">quote:</div>
           <blockquote className=" ml-2 border-l-2 border-gray-300 pl-2">{client.quote}</blockquote>
-        </p>
+        </div>
       )}
     </article>
   )

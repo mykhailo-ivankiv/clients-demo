@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import {
   many,
   anyCharExcept,
@@ -11,7 +11,7 @@ import {
   startOfInput,
   sepBy,
 } from 'arcsecond'
-import { identity, reduce, reject, pipe, last, isEmpty, map, trim, intersperse } from 'ramda'
+import { identity, reduce, reject, pipe, last, isEmpty, map, trim, intersperse, init } from 'ramda'
 import { getCountryCodeFromName } from '~/utils/location'
 
 const getQueryParser = (
@@ -81,8 +81,21 @@ const parseQueryToData = getQueryParser({
 
 const parseQueryToReact = getQueryParser({
   // @ts-ignore
-  mapQueries: intersperse(<span className="text-orange-500">;</span>),
-  mapKeyword: (keyword) => <span className="text-sky-500">{keyword}</span>,
+  mapQueries: (queries) => {
+    return (
+      <>
+        {init(queries).map((query, index) => (
+          // @ts-ignore
+          <Fragment key={index}>
+            {query}
+            <span className="text-orange-500">;</span>
+          </Fragment>
+        ))}
+        {last(queries)}
+      </>
+    )
+  },
+  mapKeyword: (keyword) => <span key={keyword} className="text-sky-500">{keyword}</span>,
 })
 
 export const getDataFromQuery = (query: string) =>
