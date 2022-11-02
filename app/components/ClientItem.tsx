@@ -29,16 +29,11 @@ export default function ClientItem({ client }: { client: Client }) {
           </h4>
         </SearchHighlightContext.Provider>
 
-        {title && parsedQuery.title?.some((query: string) => includes(query, title.toLowerCase())) && (
-          <SearchHighlightContext.Provider value={parsedQuery.title || []}>
-            <dl className="flex gap-1 text-xs">
-              <dt className="text-gray-400">title:</dt>
-              <dd className="">
-                <SearchHighlight text={title} />
-              </dd>
-            </dl>
-          </SearchHighlightContext.Provider>
-        )}
+        <SearchHighlightContext.Provider value={parsedQuery.title || []}>
+          <div className="flex gap-1 text-xs">
+            <SearchHighlight text={title || ''} />
+          </div>
+        </SearchHighlightContext.Provider>
 
         {quote && parsedQuery.quote?.some((query: string) => includes(query, quote.toLowerCase())) && (
           <SearchHighlightContext.Provider value={parsedQuery.quote || []}>
