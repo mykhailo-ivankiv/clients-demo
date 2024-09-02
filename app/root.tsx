@@ -1,10 +1,9 @@
 import type { LinksFunction, MetaFunction } from '@remix-run/node'
 import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react'
-
-import tailwindStylesheetUrl from './styles/tailwind.css'
+import styles from './tailwind.css?url'
 
 export const links: LinksFunction = () => [
-  { rel: 'stylesheet', href: tailwindStylesheetUrl },
+  { rel: 'stylesheet', href: styles },
   {
     rel: 'icon',
     href: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>",
