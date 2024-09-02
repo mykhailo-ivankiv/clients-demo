@@ -1,5 +1,5 @@
-import { useLoaderData, useCatch, Link } from '@remix-run/react'
-import type { LoaderArgs } from '@remix-run/node'
+import { useLoaderData, isRouteErrorResponse, Link, useRouteError } from '@remix-run/react'
+import type { LoaderFunctionArgs } from '@remix-run/node'
 import { json } from '@remix-run/node'
 import invariant from 'tiny-invariant'
 import { prisma } from '~/db.server'
@@ -9,7 +9,7 @@ import { useParams } from 'react-router'
 
 type LoaderData = { client: Client }
 
-export async function loader({ params }: LoaderArgs) {
+export async function loader({ params }: LoaderFunctionArgs) {
   invariant(params.clientSlug, 'noteId not found')
 
   const client = await prisma.client.findUnique({
@@ -49,31 +49,22 @@ export default function ClientDetails() {
   )
 }
 
-export function CatchBoundary() {
-  const caught = useCatch()
+export function ErrorBoundary() {
+  const error = useRouteError()
   const { clientSlug } = useParams()
-  if (caught.status === 404) {
-    return (
-      <div className="m-4 font-bold text-gray-400">
-        Ooops! We couldn't find client with id:{' '}
-        <code className="bg-gray-100 px-1 py-0.5 font-mono font-medium text-blue-700">{clientSlug}</code>
-        <Link className="my-2 block text-indigo-600 underline" to="/clients">
-          Start over
-        </Link>
-      </div>
-    )
-  }
 
-  throw new Error(`Unexpected caught response with status: ${caught.status}`)
-}
-
-export function ErrorBoundary({ error }: { error: Error }) {
-  console.error(error)
-
-  return (
+  return isRouteErrorResponse(error) ? (
+    <div className="m-4 font-bold text-gray-400">
+      Ooops! We couldn't find client with id:{' '}
+      <code className="bg-gray-100 px-1 py-0.5 font-mono font-medium text-blue-700">{clientSlug}</code>
+      <Link className="my-2 block text-indigo-600 underline" to="/clients">
+        Start over
+      </Link>
+    </div>
+  ) : (
     <div className="m-4 font-bold text-gray-400">
       An unexpected error occurred:{' '}
-      <code className=" block bg-gray-100 px-1 py-0.5 font-mono font-medium text-blue-700">{error.message}</code>
+      <code className=" block bg-gray-100 px-1 py-0.5 font-mono font-medium text-blue-700">Unknown error</code>
     </div>
   )
 }

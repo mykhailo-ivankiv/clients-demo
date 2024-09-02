@@ -1,7 +1,7 @@
 import { Form, Outlet, useLoaderData, useSubmit } from '@remix-run/react'
 import { useParams } from 'react-router'
 import { prisma } from '~/db.server'
-import type { LoaderArgs } from '@remix-run/node'
+import type { LoaderFunctionArgs } from '@remix-run/node'
 import { json } from '@remix-run/node'
 import type { Client } from '@prisma/client'
 import InputQueryClients from '~/components/InputQueryClients'
@@ -12,7 +12,7 @@ import { useMemo, useRef } from 'react'
 
 type LoaderData = { clients: Client[] }
 
-export async function loader({ request }: LoaderArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url)
   const query = url.searchParams.get('q')?.trim() || ''
   const where = getPrismaFilterQueryFromString(query)

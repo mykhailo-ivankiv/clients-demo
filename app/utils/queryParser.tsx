@@ -81,11 +81,10 @@ const parseQueryToData = getQueryParser({
 
 const parseQueryToReact = getQueryParser({
   // @ts-ignore
-  mapQueries: (queries) => {
+  mapQueries: (queries: string[]) => {
     return (
       <>
         {init(queries).map((query, index) => (
-          // @ts-ignore
           <Fragment key={index}>
             {query}
             <span className="text-orange-500">;</span>
