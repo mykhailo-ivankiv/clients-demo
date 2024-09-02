@@ -93,17 +93,17 @@ async function seed() {
   }
 
   for (let i = 0; i < 10000; i++) {
-    const name = faker.name.fullName()
+    const name = faker.person.fullName()
     const slug = await getUniqSlugFromName(name)
 
     await prisma.client.create({
       data: {
         slug,
         name,
-        title: faker.name.jobTitle(),
+        title: faker.person.jobTitle(),
         avatar: getRandomAvataaar(),
         quote: faker.lorem.sentence(),
-        nationality: faker.address.countryCode('alpha-2'),
+        nationality: faker.location.countryCode('alpha-2'),
       },
     })
   }
