@@ -2,7 +2,7 @@ import { expect, test } from 'vitest'
 import { getCountryCodes, getCountryCodeFromName, getCountryNameFromCode } from '~/utils/location'
 
 test('getCountryCodes returns an array of country codes', () => {
-  expect(getCountryCodes().length).toBe(279)
+  expect(getCountryCodes().length).toBe(280)
 })
 
 test('getCountryCodeFromName returns a country code for a country name', () => {

@@ -2,6 +2,7 @@
   "name": "clients-demo",
   "private": true,
   "sideEffects": false,
+  "type": "module",
   "scripts": {
     "build": "remix build",
     "dev": "cross-env NODE_ENV=development binode --require ./mocks -- @remix-run/dev:remix dev",
@@ -69,7 +70,7 @@
     "prettier": "3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.6",
     "prisma": "^4.16.2",
-    "start-server-and-test": "^1.15.4",
+    "start-server-and-test": "^2.0.5",
     "tailwindcss": "^3.4.10",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
