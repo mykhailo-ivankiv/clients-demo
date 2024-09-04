@@ -26,14 +26,13 @@ export default function Clients() {
   const { clientSlug } = useParams()
   const rawClients = useLoaderData<LoaderData>().clients
   const clients = useMemo(() => rawClients.map(getClientFromJson), [rawClients])
-  const submit = useSubmit()
   const formRef = useRef<HTMLFormElement>(null)
 
   return (
     <main className="mx-auto min-w-[375px] max-w-[600px] px-2">
       <Form ref={formRef} action={clientSlug ? `/clients/${clientSlug}` : '/clients'} className="w-full">
         <div className="sticky top-0 z-10 mb-1 bg-white py-2">
-          <InputQueryClients name="q" onChange={() => submit(formRef.current)} />
+          <InputQueryClients name="q" />
         </div>
 
         <div className="min-h-16 flex">
