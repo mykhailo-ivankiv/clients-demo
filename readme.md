@@ -9,3 +9,6 @@ Seme of the features are:
 - search by any field
 - combining "AND" and "OR" search queries
 - search highlighting
+
+# Deployment
+I use fly.io for deployment. It's a great service that allows you to deploy your app in seconds. You can find more information about it [here](https://fly.io/)
