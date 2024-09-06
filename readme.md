@@ -10,5 +10,8 @@ Seme of the features are:
 - combining "AND" and "OR" search queries
 - search highlighting
 
+# Setup
+@todo: add setup instructions
+
 # Deployment
 I use fly.io for deployment. It's a great service that allows you to deploy your app in seconds. You can find more information about it [here](https://fly.io/)
